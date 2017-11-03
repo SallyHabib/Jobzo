@@ -45,9 +45,9 @@ type Result struct {
 type Data struct {
 	//Success bool "json:city"
 
-	Status   string `json:status`
-	Success  bool   `json:success`
-	Response string `json:response`
+	Status   string `json:"status"`
+	Success  bool   `json:"success"`
+	Response string `json:"response"`
 }
 
 // WriteJSON ... function
@@ -128,21 +128,12 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 // SearchGlassdoor ... function
 func SearchGlassdoor(w http.ResponseWriter, r *http.Request) {
 	response, _ := http.Get("http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=216693&t.k=bhhitzZ6DNo&action=employers&q=pharmaceuticals")
-	/*//	responseData, err := ioutil.ReadAll(response.Body)
-
 	defer response.Body.Close()
-	//message, _ := resp["response"].(string)*/
-
 	result := Data{}
 	json.NewDecoder(response.Body).Decode(&result)
-
-	// data, err := ioutil.ReadAll(response.Body)
-
-	// if err == nil && data != nil {
-	// 	err = json.Unmarshal(data, &result)
-
-	// }
-	fmt.Fprint(w, result)
+	enc := json.NewEncoder(w)
+    enc.Encode(result)
+	w.Header().Set("Content-Type", "application/json")
 }
 
 // Chat ... function
