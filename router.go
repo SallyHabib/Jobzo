@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"errors"
 
 	cors "github.com/heppu/simple-cors"
 )
@@ -36,18 +37,27 @@ type Message struct {
 	message string
 }
 
-// Result ... type
-type Result struct {
-	Response string `json:"response"`
+type Response struct {
+	Info SearchInfo `json:"searchInformation"`
+	Items []Job `json:"items"`
 }
 
-//Data ... type
-type Data struct {
-	//Success bool "json:city"
+type SearchInfo struct {
+	Num string `json:"totalResults"`
+}
 
-	Status   string `json:"status"`
-	Success  bool   `json:"success"`
-	Response string `json:"response"`
+type Job struct {
+	Title string `json:"title"` 
+	Link string `json:"link"`
+	Image  Thumbnail `json:"pagemap"`
+}
+
+type Thumbnail struct {
+	Cse_image []ImageSrc `json:"cse_image"`
+}
+
+type ImageSrc struct {
+	Src string `json:"src"`
 }
 
 // WriteJSON ... function
@@ -126,14 +136,31 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 }
 
 // SearchGlassdoor ... function
-func SearchGlassdoor(w http.ResponseWriter, r *http.Request) {
-	response, _ := http.Get("http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=216693&t.k=bhhitzZ6DNo&action=employers&q=pharmaceuticals")
-	defer response.Body.Close()
-	result := Data{}
+// func SearchGlassdoor(w http.ResponseWriter, r *http.Request) {
+// 	response, _ := http.Get("http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=216693&t.k=bhhitzZ6DNo&action=employers&q=pharmaceuticals")
+// 	defer response.Body.Close()
+// 	result := Data{}
+// 	json.NewDecoder(response.Body).Decode(&result)
+// 	enc := json.NewEncoder(w)
+//     enc.Encode(result)
+// 	w.Header().Set("Content-Type", "application/json")
+// }
+
+// SearchGoogle ... function
+func SearchGoogle(w http.ResponseWriter, r *http.Request, searchWord string)(Response, error) {
+	response, err := http.Get("https://www.googleapis.com/customsearch/v1?q="+ searchWord +"%20jobs&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=017576662512468239146:omuauf_lfve&cr=Egypt&num=5")
+	result := Response{}
+	if err != nil {
+		return result, err
+	}
+	defer response.Body.Close()	
 	json.NewDecoder(response.Body).Decode(&result)
-	enc := json.NewEncoder(w)
-    enc.Encode(result)
-	w.Header().Set("Content-Type", "application/json")
+	i, err := strconv.Atoi(result.Info.Num) 
+	if i == 0 {
+		err := errors.New("No jobs found")
+		return result, err
+	}
+	return result, err
 }
 
 // Chat ... function
@@ -150,11 +177,11 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Make sure a session exists for the extracted UUID
-	session, sessionFound := sessions[uuid]
-	if !sessionFound {
-		http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
-		return
-	}
+	// session, sessionFound := sessions[uuid]
+	// if !sessionFound {
+	// 	http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
+	// 	return
+	// }
 	// Parse the JSON string in the body of the request
 	data := JSON{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -168,15 +195,21 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing message key in body.", http.StatusBadRequest)
 		return
 	}
-	// Process the received message
-	message, err := processor(session, data["message"].(string))
+
+	message, err := SearchGoogle(w,r,data["message"].(string))
 	if err != nil {
 		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
 		return
 	}
+	// // Process the received message
+	// message, err := processor(session, data["message"].(string))
+	// if err != nil {
+	// 	http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
+	// 	return
+	// }
 	// Write a JSON containg the processed response
 	WriteJSON(w, JSON{
-		"message": message,
+		"message": message.Items[0].Title,
 	})
 }
 
@@ -194,7 +227,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/welcome", withLog(SearchGlassdoor))
+	mux.HandleFunc("/welcome", withLog(Welcome))
 	mux.HandleFunc("/chat", withLog(Chat))
 	mux.HandleFunc("/", withLog(handle))
 	// Start the server
