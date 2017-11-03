@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"errors"
 
 	cors "github.com/heppu/simple-cors"
 )
@@ -20,6 +20,8 @@ var (
 	sessions  = map[string]Session{}
 	processor = sampleProcessor
 )
+
+var userInputs []string
 
 type (
 	// Session Holds info about a session
@@ -37,25 +39,30 @@ type Message struct {
 	message string
 }
 
+// Response ... type
 type Response struct {
-	Info SearchInfo `json:"searchInformation"`
-	Items []Job `json:"items"`
+	Info  SearchInfo `json:"searchInformation"`
+	Items []Job      `json:"items"`
 }
 
+// SearchInfo ... type
 type SearchInfo struct {
 	Num string `json:"totalResults"`
 }
 
+// Job ... type
 type Job struct {
-	Title string `json:"title"` 
-	Link string `json:"link"`
-	Image  Thumbnail `json:"pagemap"`
+	Title string    `json:"title"`
+	Link  string    `json:"link"`
+	Image Thumbnail `json:"pagemap"`
 }
 
+// Thumbnail ... type
 type Thumbnail struct {
-	Cse_image []ImageSrc `json:"cse_image"`
+	CseImage []ImageSrc `json:"cse_image"`
 }
 
+// ImageSrc ... type
 type ImageSrc struct {
 	Src string `json:"src"`
 }
@@ -130,7 +137,7 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 	// Create a session for this UUID
 	sessions[uuid] = Session{}
 	WriteJSON(w, JSON{
-		"message": "Welcome what do you want to order?",
+		"message": "Hiii",
 		"uuid":    uuid,
 	})
 }
@@ -147,20 +154,62 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 // }
 
 // SearchGoogle ... function
-func SearchGoogle(w http.ResponseWriter, r *http.Request, searchWord string)(Response, error) {
-	response, err := http.Get("https://www.googleapis.com/customsearch/v1?q="+ searchWord +"%20jobs&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=017576662512468239146:omuauf_lfve&cr=Egypt&num=5")
+func SearchGoogle(searchWord string, job string, country string) (Response, error) {
+	var kind string
+	var link string
+	if strings.Contains(job, "job") {
+		kind = "jobs"
+	} else {
+		kind = "internships"
+	}
+	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=017576662512468239146:omuauf_lfve&cr=" + country + "&num=5"
+	response, err := http.Get(link)
 	result := Response{}
 	if err != nil {
 		return result, err
 	}
-	defer response.Body.Close()	
+	defer response.Body.Close()
 	json.NewDecoder(response.Body).Decode(&result)
-	i, err := strconv.Atoi(result.Info.Num) 
+	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
 		err := errors.New("No jobs found")
 		return result, err
 	}
 	return result, err
+}
+
+// HandleSequence ... function
+func HandleSequence(session Session, input string) (string, error) {
+	_, counterFound := session["counter"]
+	if !counterFound {
+		session["counter"] = 0
+	}
+	counter, _ := session["counter"].(int)
+
+	switch counter {
+	case 0:
+		counter++
+		session["counter"] = counter
+		return "What field are you interested in?", nil
+	case 1:
+		newInput := strings.Replace(input, " ", "%20", -1)
+		userInputs = append(userInputs, newInput)
+		counter++
+		session["counter"] = counter
+		return "Are you looking for a job or an internship?", nil
+	case 2:
+		userInputs = append(userInputs, input)
+		counter++
+		session["counter"] = counter
+		return "which country?", nil
+	case 3:
+		newInput := strings.Replace(input, " ", "%20", -1)
+		userInputs = append(userInputs, newInput)
+		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
+		message, err := SearchGoogle(userInputs[0], userInputs[1], userInputs[2])
+		return message.Items[0].Title, err
+	}
+	return "", nil
 }
 
 // Chat ... function
@@ -176,12 +225,12 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing or empty Authorization header.", http.StatusUnauthorized)
 		return
 	}
-	// Make sure a session exists for the extracted UUID
-	// session, sessionFound := sessions[uuid]
-	// if !sessionFound {
-	// 	http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
-	// 	return
-	// }
+	//Make sure a session exists for the extracted UUID
+	session, sessionFound := sessions[uuid]
+	if !sessionFound {
+		http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
+		return
+	}
 	// Parse the JSON string in the body of the request
 	data := JSON{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -196,7 +245,7 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := SearchGoogle(w,r,data["message"].(string))
+	message, err := HandleSequence(session, data["message"].(string))
 	if err != nil {
 		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
 		return
@@ -209,7 +258,7 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 	// }
 	// Write a JSON containg the processed response
 	WriteJSON(w, JSON{
-		"message": message.Items[0].Title,
+		"message": message,
 	})
 }
 
