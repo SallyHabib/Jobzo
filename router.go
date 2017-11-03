@@ -132,7 +132,7 @@ func SearchGlassdoor(w http.ResponseWriter, r *http.Request) {
 	result := Data{}
 	json.NewDecoder(response.Body).Decode(&result)
 	enc := json.NewEncoder(w)
-    enc.Encode(result)
+	enc.Encode(result)
 	w.Header().Set("Content-Type", "application/json")
 }
 
