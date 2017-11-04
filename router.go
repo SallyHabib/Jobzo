@@ -22,7 +22,6 @@ var (
 	sessions  = map[string]Session{}
 	processor = sampleProcessor
 )
-
 var userInputs []string
 
 type (
