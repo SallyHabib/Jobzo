@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"os"
+//	"os"
 
 	cors "github.com/heppu/simple-cors"
 )
-import _ "github.com/joho/godotenv/autoload"
+//import _ "github.com/joho/godotenv/autoload"
 
 var (
 	sessions  = map[string]Session{}
@@ -281,11 +281,11 @@ func main() {
 	mux.HandleFunc("/welcome", withLog(Welcome))
 	mux.HandleFunc("/chat", withLog(Chat))
 	mux.HandleFunc("/", withLog(handle))
-	//Start the server
-	port := os.Getenv("PORT")
-	// Default to 3000 if no PORT environment variable was defined
-	if port == "" {
-		port = ":8080"
-	}
-	log.Fatal(http.ListenAndServe(port, cors.CORS(mux)))
+	// //Start the server
+	// port := os.Getenv("PORT")
+	// // Default to 3000 if no PORT environment variable was defined
+	// if port == "" {
+	// 	port = ":8080"
+	// }
+	log.Fatal(http.ListenAndServe(":8080", cors.CORS(mux)))
 }
