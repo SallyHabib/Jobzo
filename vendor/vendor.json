@@ -1,0 +1,9 @@
+{
+    "rootPath": "Jobzo",
+    "heroku": {
+        "install": [
+            "github.com/heppu/simple-cors"
+        ],
+        "goVersion": "go1.9"
+    }
+}
