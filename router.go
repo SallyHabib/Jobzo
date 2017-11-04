@@ -281,7 +281,7 @@ func main() {
 	mux.HandleFunc("/welcome", withLog(Welcome))
 	mux.HandleFunc("/chat", withLog(Chat))
 	mux.HandleFunc("/", withLog(handle))
-	// Start the server
+	//Start the server
 	port := os.Getenv("PORT")
 	// Default to 3000 if no PORT environment variable was defined
 	if port == "" {
