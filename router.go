@@ -9,10 +9,10 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"strings"
 	"time"
-	"os"
 
 	cors "github.com/heppu/simple-cors"
 )
@@ -163,7 +163,7 @@ func SearchGoogle(searchWord string, job string, country string) (Response, erro
 	} else {
 		kind = "internships"
 	}
-	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=017576662512468239146:omuauf_lfve&cr=" + country + "&num=5"
+	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:vmlxelexg7y&cr=" + country + "&num=10"
 	response, err := http.Get(link)
 	result := Response{}
 	if err != nil {
@@ -177,6 +177,17 @@ func SearchGoogle(searchWord string, job string, country string) (Response, erro
 		return result, err
 	}
 	return result, err
+}
+
+// Urls ... function
+func Urls(x Response) string {
+	i := 0
+	message := ""
+	for i < len(x.Items) {
+		message += "\n" + x.Items[i].Link + "\n"
+		i++
+	}
+	return message
 }
 
 // HandleSequence ... function
@@ -207,8 +218,9 @@ func HandleSequence(session Session, input string) (string, error) {
 		newInput := strings.Replace(input, " ", "%20", -1)
 		userInputs = append(userInputs, newInput)
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
-		message, err := SearchGoogle(userInputs[0], userInputs[1], userInputs[2])
-		return message.Items[0].Title, err
+		messageResp, err := SearchGoogle(userInputs[0], userInputs[1], userInputs[2])
+		message := Urls(messageResp)
+		return message, err
 	}
 	return "", nil
 }
