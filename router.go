@@ -139,6 +139,49 @@ func Urls(x Response) string {
 
 // HandleSequence ... function
 func HandleSequence(session Session, input string) (string, error) {
+	var message string
+	var err error
+
+	_, Found := session["initialize"]
+	if !Found {
+		session["initialize"] = 0
+	}
+	initialize, _ := session["initialize"].(int)
+
+	_, scenarioFound := session["scenario"]
+	if !scenarioFound {
+		session["scenario"] = -1
+	}
+	scenario, _ := session["scenario"].(int)
+
+	switch initialize {
+	case 0:
+		initialize++
+		session["initialize"] = initialize
+		return "What do you want to search for?", nil
+	case 1:
+		switch input {
+		case "Jobs":
+			scenario = 0
+			session["scenario"] = scenario
+		case "courses":
+			scenario = 1
+			session["scenario"] = scenario
+		case "masters":
+			scenario = 2
+			session["scenario"] = scenario
+		}
+
+		switch scenario {
+		case 0:
+			message, err = HandleJobs(session, input)
+		}
+	}
+	return message, err
+}
+
+// HandleJobs ... function
+func HandleJobs(session Session, input string) (string, error) {
 	_, arrayFound := session["preferences"]
 	if !arrayFound {
 		var array []string
