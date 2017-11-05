@@ -19,10 +19,8 @@ import (
 import _ "github.com/joho/godotenv/autoload"
 
 var (
-	sessions  = map[string]Session{}
-	processor = sampleProcessor
+	sessions = map[string]Session{}
 )
-var userInputs []string
 
 type (
 	// Session Holds info about a session
@@ -74,46 +72,6 @@ func WriteJSON(w http.ResponseWriter, data JSON) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func sampleProcessor(session Session, message string) (string, error) {
-	// Make sure a history key is defined in the session which points to a slice of strings
-	_, historyFound := session["history"]
-	if !historyFound {
-		session["history"] = []string{}
-	}
-
-	// Fetch the history from session and cast it to an array of strings
-	history, _ := session["history"].([]string)
-
-	// Make sure the message is unique in history
-	for _, m := range history {
-		if strings.EqualFold(m, message) {
-			return "", fmt.Errorf("You've already ordered %s before!", message)
-		}
-	}
-
-	// Add the message in the parsed body to the messages in the session
-	history = append(history, message)
-
-	// Form a sentence out of the history in the form Message 1, Message 2, and Message 3
-	l := len(history)
-	wordsForSentence := make([]string, l)
-	copy(wordsForSentence, history)
-	if l > 1 {
-		wordsForSentence[l-1] = "and " + wordsForSentence[l-1]
-	}
-	sentence := strings.Join(wordsForSentence, ", ")
-
-	// Save the updated history to the session
-	session["history"] = history
-
-	return fmt.Sprintf("So, you want %s! What else?", strings.ToLower(sentence)), nil
-}
-
-// ProcessFunc Sets the processor of the chatbot
-func ProcessFunc(p Processor) {
-	processor = p
-}
-
 // withLog Wraps HandlerFuncs to log requests to Stdout
 func withLog(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -143,17 +101,6 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// SearchGlassdoor ... function
-// func SearchGlassdoor(w http.ResponseWriter, r *http.Request) {
-// 	response, _ := http.Get("http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=216693&t.k=bhhitzZ6DNo&action=employers&q=pharmaceuticals")
-// 	defer response.Body.Close()
-// 	result := Data{}
-// 	json.NewDecoder(response.Body).Decode(&result)
-// 	enc := json.NewEncoder(w)
-//     enc.Encode(result)
-// 	w.Header().Set("Content-Type", "application/json")
-// }
-
 // SearchGoogle ... function
 func SearchGoogle(searchWord string, job string, country string) (Response, error) {
 	var kind string
@@ -163,7 +110,7 @@ func SearchGoogle(searchWord string, job string, country string) (Response, erro
 	} else {
 		kind = "internships"
 	}
-	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:vmlxelexg7y&cr=" + country + "&num=10"
+	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:vmlxelexg7y&num=10"
 	response, err := http.Get(link)
 	result := Response{}
 	if err != nil {
@@ -192,11 +139,17 @@ func Urls(x Response) string {
 
 // HandleSequence ... function
 func HandleSequence(session Session, input string) (string, error) {
+	_, arrayFound := session["preferences"]
+	if !arrayFound {
+		var array []string
+		session["preferences"] = array
+	}
 	_, counterFound := session["counter"]
 	if !counterFound {
 		session["counter"] = 0
 	}
 	counter, _ := session["counter"].(int)
+	userInputs, _ := session["preferences"].([]string)
 
 	switch counter {
 	case 0:
@@ -206,11 +159,13 @@ func HandleSequence(session Session, input string) (string, error) {
 	case 1:
 		newInput := strings.Replace(input, " ", "%20", -1)
 		userInputs = append(userInputs, newInput)
+		session["preferences"] = userInputs
 		counter++
 		session["counter"] = counter
 		return "Are you looking for a job or an internship?", nil
 	case 2:
 		userInputs = append(userInputs, input)
+		session["preferences"] = userInputs
 		counter++
 		session["counter"] = counter
 		return "which country?", nil
@@ -220,6 +175,10 @@ func HandleSequence(session Session, input string) (string, error) {
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
 		messageResp, err := SearchGoogle(userInputs[0], userInputs[1], userInputs[2])
 		message := Urls(messageResp)
+		userInputs = userInputs[:0]
+		session["preferences"] = userInputs
+		counter = 0
+		session["counter"] = counter
 		return message, err
 	}
 	return "", nil
@@ -263,12 +222,7 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
 		return
 	}
-	// // Process the received message
-	// message, err := processor(session, data["message"].(string))
-	// if err != nil {
-	// 	http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
-	// 	return
-	// }
+
 	// Write a JSON containg the processed response
 	WriteJSON(w, JSON{
 		"message": message,
