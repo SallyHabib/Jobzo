@@ -4,19 +4,34 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
 	"../models"
 )
 
+// getCountries ... function
+func getCountries() []models.Country {
+	raw, err := ioutil.ReadFile("./countries.json")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	var c []models.Country
+	json.Unmarshal(raw, &c)
+	return c
+}
+
 // Urls ... function
 func Urls(x models.Response) string {
 	i := 0
 	message := ""
 	for i < len(x.Items) {
-		message += "\n" + x.Items[i].Link + "\n"
+		message += x.Items[i].Link + "<br>"
 		i++
 	}
 	return message
@@ -105,6 +120,20 @@ func HandleJobs(session models.Session, input string) (string, error) {
 		session["counter"] = counter
 		return "which country?", nil
 	case 3:
+		countries := getCountries()
+		found := false
+
+		for _, c := range countries {
+			fmt.Println(strings.ToLower(c.Name))
+			if strings.ToLower(input) == strings.ToLower(c.Name) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return "Please enter a valid country", nil
+		}
 		newInput := strings.Replace(input, " ", "%20", -1)
 		userInputs = append(userInputs, newInput)
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
@@ -162,7 +191,7 @@ func HandleCourses(session models.Session, input string) (string, error) {
 	case 0:
 		counter++
 		session["coursesCounter"] = counter
-		return "What field are you interested in?", nil
+		return "What course you want to learn?", nil
 	case 1:
 		newInput := strings.Replace(input, " ", "%20", -1)
 		userInputs = append(userInputs, newInput)
@@ -223,7 +252,7 @@ func HandleDegrees(session models.Session, input string) (string, error) {
 	case 0:
 		counter++
 		session["degreesCounter"] = counter
-		return "What field are you interested in?", nil
+		return "What topic are you interested in?", nil
 	case 1:
 		newInput := strings.Replace(input, " ", "%20", -1)
 		userInputs = append(userInputs, newInput)
@@ -273,9 +302,13 @@ func HandleSequence(session models.Session, input string) (string, error) {
 	case 0:
 		initialize++
 		session["initialize"] = initialize
-		return "What do you want to search for?", nil
+		choices := "What do you want to search for?<br>" +
+			"1) Jobs & Internships (type jobs)<br>" +
+			"2) Courses (type courses)<br>" +
+			"3) Bachelor, Masters & PHD Degrees (type degrees)"
+		return choices, nil
 	case 1:
-		switch input {
+		switch strings.ToLower(input) {
 		case "jobs":
 			scenario = 0
 			session["scenario"] = scenario

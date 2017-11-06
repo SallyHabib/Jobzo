@@ -8,6 +8,11 @@ type (
 	JSON map[string]interface{}
 )
 
+// Country ... type
+type Country struct {
+	Name string `json:"name"`
+}
+
 // Response ... type
 type Response struct {
 	Info  SearchInfo `json:"searchInformation"`
