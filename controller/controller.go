@@ -46,7 +46,7 @@ func SearchForLocalJobs(searchWord string, job string, country string) (models.R
 	} else {
 		kind = "internships"
 	}
-	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:vmlxelexg7y&num=10"
+	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:vmlxelexg7y&num=5"
 	response, err := http.Get(link)
 	result := models.Response{}
 	if err != nil {
@@ -72,7 +72,7 @@ func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (mo
 	} else {
 		kind = "internships"
 	}
-	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:gj2panfjzja&num=10"
+	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:gj2panfjzja&num=5"
 	response, err := http.Get(link)
 	result := models.Response{}
 	if err != nil {
@@ -98,7 +98,32 @@ func SearchForGlobalJobs(searchWord string, job string, country string) (models.
 	} else {
 		kind = "internships"
 	}
-	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:xojc8tra6ua&num=10"
+	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:xojc8tra6ua&num=5"
+	response, err := http.Get(link)
+	result := models.Response{}
+	if err != nil {
+		return result, err
+	}
+	defer response.Body.Close()
+	json.NewDecoder(response.Body).Decode(&result)
+	i, err := strconv.Atoi(result.Info.Num)
+	if i == 0 {
+		err := errors.New("No jobs found")
+		return result, err
+	}
+	return result, err
+}
+
+// SearchForGlobalJobsGlassdoor ... function
+func SearchForGlobalJobsGlassdoor(searchWord string, job string, country string) (models.Response, error) {
+	var kind string
+	var link string
+	if strings.Contains(job, "job") {
+		kind = "jobs"
+	} else {
+		kind = "internships"
+	}
+	link = "https://www.googleapis.com/customsearch/v1?q=" + searchWord + "%20" + kind + "%20in%20" + country + "&key=AIzaSyAeALD2cLr3-NSEoOz2wUjLMhaOOxgLUN0&cx=006422052657745549454:l5p6gvxphiy&num=5"
 	response, err := http.Get(link)
 	result := models.Response{}
 	if err != nil {
@@ -166,15 +191,18 @@ func HandleJobs(session models.Session, input string) (string, error) {
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
 		messageResp := models.Response{}
 		messageResp2 := models.Response{}
+
 		var err error
 		if strings.ToLower(userInputs[2]) == "egypt" {
 			messageResp, err = SearchForLocalJobs(userInputs[0], userInputs[1], userInputs[2])
 			messageResp2, err = SearchForLocalJobsWuzzuf(userInputs[0], userInputs[1], userInputs[2])
 		} else {
 			messageResp, err = SearchForGlobalJobs(userInputs[0], userInputs[1], userInputs[2])
+			messageResp2, err = SearchForGlobalJobsGlassdoor(userInputs[0], userInputs[1], userInputs[2])
 		}
 		message := Urls(messageResp)
 		message2 := Urls(messageResp2)
+
 		userInputs = userInputs[:0]
 		session["preferences"] = userInputs
 		counter = 0
