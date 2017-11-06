@@ -267,6 +267,21 @@ func HandleDegrees(session models.Session, input string) (string, error) {
 		session["degreesCounter"] = counter
 		return "which country?", nil
 	case 3:
+		countries := getCountries()
+		found := false
+
+		for _, c := range countries {
+			fmt.Println(strings.ToLower(c.Name))
+			if strings.ToLower(input) == strings.ToLower(c.Name) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return "Please enter a valid country", nil
+		}
+
 		newInput := strings.Replace(input, " ", "%20", -1)
 		userInputs = append(userInputs, newInput)
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
