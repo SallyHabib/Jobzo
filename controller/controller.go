@@ -13,6 +13,12 @@ import (
 	"../models"
 )
 
+// Thanking ... array
+var Thanking = [...]string{"Thank u", "Thanks", "Thank you", "Merci"}
+
+// Goodbyes ... array
+var Goodbyes = [...]string{"bye", "au revoir", "salam"}
+
 // getCountries ... function
 func getCountries() []models.Country {
 	raw, err := ioutil.ReadFile("./countries.json")
@@ -358,6 +364,18 @@ func HandleSequence(session models.Session, input string) (string, error) {
 	var message string
 	var err error
 
+	for _, c := range Thanking {
+		if strings.ToLower(input) == strings.ToLower(c) {
+			return "7byby teslam", nil
+		}
+	}
+
+	for _, c := range Goodbyes {
+		if strings.ToLower(input) == strings.ToLower(c) {
+			return "Bye", nil
+		}
+	}
+
 	_, Found := session["initialize"]
 	if !Found {
 		session["initialize"] = 0
@@ -390,6 +408,20 @@ func HandleSequence(session models.Session, input string) (string, error) {
 		case "degrees":
 			scenario = 2
 			session["scenario"] = scenario
+		case "restart":
+			choices := "What do you want to search for?<br>" +
+				"1) Jobs & Internships (type jobs)<br>" +
+				"2) Courses (type courses)<br>" +
+				"3) Bachelor, Masters & PHD Degrees (type degrees)"
+			var array []string
+			session["preferences"] = array
+			session["counter"] = 0
+			session["coursesCounter"] = 0
+			session["courses"] = array
+			session["degrees"] = array
+			session["degreesCounter"] = 0
+
+			return choices, nil
 		}
 
 		switch scenario {
@@ -400,6 +432,7 @@ func HandleSequence(session models.Session, input string) (string, error) {
 		case 2:
 			message, err = HandleDegrees(session, input)
 		}
+
 	}
 	return message, err
 }
