@@ -124,7 +124,6 @@ func HandleJobs(session models.Session, input string) (string, error) {
 		found := false
 
 		for _, c := range countries {
-			fmt.Println(strings.ToLower(c.Name))
 			if strings.ToLower(input) == strings.ToLower(c.Name) {
 				found = true
 				break
@@ -271,7 +270,6 @@ func HandleDegrees(session models.Session, input string) (string, error) {
 		found := false
 
 		for _, c := range countries {
-			fmt.Println(strings.ToLower(c.Name))
 			if strings.ToLower(input) == strings.ToLower(c.Name) {
 				found = true
 				break
