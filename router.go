@@ -28,6 +28,11 @@ func WriteJSON(w http.ResponseWriter, data models.JSON) {
 	json.NewEncoder(w).Encode(data)
 }
 
+func WriteJSON2(w http.ResponseWriter, data models.Response) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
 // withLog Wraps HandlerFuncs to log requests to Stdout
 func withLog(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -78,6 +83,8 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 	}
 	// Parse the JSON string in the body of the request
 	data := models.JSON{}
+	response := models.Response{}
+
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		http.Error(w, fmt.Sprintf("Couldn't decode JSON: %v.", err), http.StatusBadRequest)
 		return
@@ -90,16 +97,21 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := controller.HandleSequence(session, data["message"].(string))
+	message, response, err := controller.HandleSequence(session, data["message"].(string))
 	if err != nil {
 		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
 		return
 	}
 
 	// Write a JSON containg the processed response
-	WriteJSON(w, models.JSON{
-		"message": message,
-	})
+	if message != "" {
+		WriteJSON(w, models.JSON{
+			"message": message,
+		})
+	} else {
+		WriteJSON2(w, response)
+
+	}
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
