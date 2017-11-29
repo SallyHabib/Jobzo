@@ -17,7 +17,6 @@ import (
 
 	cors "github.com/heppu/simple-cors"
 )
-import _ "github.com/joho/godotenv/autoload"
 
 var (
 	sessions = map[string]models.Session{}
