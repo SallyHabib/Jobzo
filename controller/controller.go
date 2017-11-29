@@ -32,17 +32,6 @@ func getCountries() []models.Country {
 	return c
 }
 
-// Urls ... function
-func Urls(x models.Response) string {
-	i := 0
-	message := ""
-	for i < len(x.Items) {
-		message += x.Items[i].Link + "<br>"
-		i++
-	}
-	return message
-}
-
 // SearchForLocalJobs ... function
 func SearchForLocalJobs(searchWord string, job string, country string) (models.Response, error) {
 	var kind string
@@ -91,7 +80,6 @@ func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (mo
 		err := errors.New("No jobs found")
 		return result, err
 	}
-
 	return result, err
 }
 
@@ -192,12 +180,12 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		if !found {
 			return "Please enter a valid country", resp, nil
 		}
+
 		newInput := strings.Replace(input, " ", "%20", -1)
 		userInputs = append(userInputs, newInput)
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
 		messageResp := models.Response{}
 		messageResp2 := models.Response{}
-		//messageResp3 := models.Response{}
 
 		var err error
 		if strings.ToLower(userInputs[2]) == "egypt" {
@@ -207,6 +195,8 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 			messageResp, err = SearchForGlobalJobs(userInputs[0], userInputs[1], userInputs[2])
 			messageResp2, err = SearchForGlobalJobsGlassdoor(userInputs[0], userInputs[1], userInputs[2])
 		}
+
+		// concatenating 2 results
 		i := 0
 		for i < len(messageResp2.Items) {
 			messageResp.Items = append(messageResp.Items, messageResp2.Items[i])
@@ -354,7 +344,6 @@ func HandleDegrees(session models.Session, input string) (string, models.Respons
 		userInputs = append(userInputs, newInput)
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
 		messageResp, err := SearchForDegrees(userInputs[0], userInputs[1], userInputs[2])
-		//	message := Urls(messageResp)
 		userInputs = userInputs[:0]
 		session["degrees"] = userInputs
 		counter = 0

@@ -28,6 +28,7 @@ func WriteJSON(w http.ResponseWriter, data models.JSON) {
 	json.NewEncoder(w).Encode(data)
 }
 
+// WriteJSON2 ... function
 func WriteJSON2(w http.ResponseWriter, data models.Response) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
@@ -83,7 +84,6 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 	}
 	// Parse the JSON string in the body of the request
 	data := models.JSON{}
-	response := models.Response{}
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		http.Error(w, fmt.Sprintf("Couldn't decode JSON: %v.", err), http.StatusBadRequest)
@@ -110,7 +110,6 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		})
 	} else {
 		WriteJSON2(w, response)
-
 	}
 }
 
