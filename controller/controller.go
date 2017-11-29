@@ -196,24 +196,27 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		userInputs = append(userInputs, newInput)
 		fmt.Println(userInputs[0], userInputs[1], userInputs[2])
 		messageResp := models.Response{}
-		//	messageResp2 := models.Response{}
+		messageResp2 := models.Response{}
+		//messageResp3 := models.Response{}
 
 		var err error
 		if strings.ToLower(userInputs[2]) == "egypt" {
 			messageResp, err = SearchForLocalJobs(userInputs[0], userInputs[1], userInputs[2])
-			//	messageResp2, err = SearchForLocalJobsWuzzuf(userInputs[0], userInputs[1], userInputs[2])
+			messageResp2, err = SearchForLocalJobsWuzzuf(userInputs[0], userInputs[1], userInputs[2])
 		} else {
 			messageResp, err = SearchForGlobalJobs(userInputs[0], userInputs[1], userInputs[2])
-			//	messageResp2, err = SearchForGlobalJobsGlassdoor(userInputs[0], userInputs[1], userInputs[2])
+			messageResp2, err = SearchForGlobalJobsGlassdoor(userInputs[0], userInputs[1], userInputs[2])
 		}
-		//	message := Urls(messageResp)
-		//message2 := Urls(messageResp2)
-
+		i := 0
+		for i < len(messageResp2.Items) {
+			messageResp.Items = append(messageResp.Items, messageResp2.Items[i])
+			i = i + 1
+		}
 		userInputs = userInputs[:0]
 		session["preferences"] = userInputs
 		counter = 0
 		session["counter"] = counter
-		//	resultReturn := message + message2
+
 		return "", messageResp, err
 	}
 	return "", resp, nil
