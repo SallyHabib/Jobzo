@@ -161,11 +161,23 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		session["counter"] = counter
 		return "Are you looking for a job or an internship?", resp, nil
 	case 2:
-		userInputs = append(userInputs, input)
-		session["preferences"] = userInputs
-		counter++
-		session["counter"] = counter
-		return "which country?", resp, nil
+		switch strings.ToLower(input) {
+		case "job":
+			userInputs = append(userInputs, input)
+			session["preferences"] = userInputs
+			counter++
+			session["counter"] = counter
+			return "which country?", resp, nil
+		case "internship":
+			userInputs = append(userInputs, input)
+			session["preferences"] = userInputs
+			counter++
+			session["counter"] = counter
+			return "which country?", resp, nil
+		default:
+			return "Please choose Job OR Internship", resp, nil
+		}
+
 	case 3:
 		countries := getCountries()
 		found := false
@@ -258,16 +270,41 @@ func HandleCourses(session models.Session, input string) (string, models.Respons
 		session["coursesCounter"] = counter
 		return "Are you searching for beginner, intermediate or advanced course?", resp, nil
 	case 2:
-		newInput := strings.Replace(input, " ", "%20", -1)
-		userInputs = append(userInputs, newInput)
-		fmt.Println(userInputs[0], userInputs[1])
-		messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
-		//message := Urls(messageResp)
-		userInputs = userInputs[:0]
-		session["courses"] = userInputs
-		counter = 0
-		session["coursesCounter"] = counter
-		return "", messageResp, err
+		switch strings.ToLower(input) {
+		case "beginner":
+			newInput := strings.Replace(input, " ", "%20", -1)
+			userInputs = append(userInputs, newInput)
+			fmt.Println(userInputs[0], userInputs[1])
+			messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
+			userInputs = userInputs[:0]
+			session["courses"] = userInputs
+			counter = 0
+			session["coursesCounter"] = counter
+			return "", messageResp, err
+		case "intermediate":
+			newInput := strings.Replace(input, " ", "%20", -1)
+			userInputs = append(userInputs, newInput)
+			fmt.Println(userInputs[0], userInputs[1])
+			messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
+			userInputs = userInputs[:0]
+			session["courses"] = userInputs
+			counter = 0
+			session["coursesCounter"] = counter
+			return "", messageResp, err
+		case "advanced":
+			newInput := strings.Replace(input, " ", "%20", -1)
+			userInputs = append(userInputs, newInput)
+			fmt.Println(userInputs[0], userInputs[1])
+			messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
+			userInputs = userInputs[:0]
+			session["courses"] = userInputs
+			counter = 0
+			session["coursesCounter"] = counter
+			return "", messageResp, err
+		default:
+			return "Please choose one of the following beginner , intermediate, advanced", resp, nil
+		}
+
 	}
 	return "", resp, nil
 }
@@ -320,11 +357,30 @@ func HandleDegrees(session models.Session, input string) (string, models.Respons
 		session["degreesCounter"] = counter
 		return "Are you looking for a Bachelor , Masters or PHD?", resp, nil
 	case 2:
-		userInputs = append(userInputs, input)
-		session["degrees"] = userInputs
-		counter++
-		session["degreesCounter"] = counter
-		return "which country?", resp, nil
+		switch strings.ToLower(input) {
+		case "bachelor":
+			userInputs = append(userInputs, input)
+			session["degrees"] = userInputs
+			counter++
+			session["degreesCounter"] = counter
+			return "which country?", resp, nil
+		case "masters":
+			userInputs = append(userInputs, input)
+			session["degrees"] = userInputs
+			counter++
+			session["degreesCounter"] = counter
+			return "which country?", resp, nil
+		case "phd":
+			userInputs = append(userInputs, input)
+			session["degrees"] = userInputs
+			counter++
+			session["degreesCounter"] = counter
+			return "which country?", resp, nil
+
+		default:
+			return "Please enter one of the 3 Choices PHD,Masters OR Bachelor", resp, nil
+		}
+
 	case 3:
 		countries := getCountries()
 		found := false
@@ -387,11 +443,12 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 	case 0:
 		initialize++
 		session["initialize"] = initialize
-		choices := "What do you want to search for?<br>" +
-			"1) Jobs & Internships (type jobs)<br>" +
-			"2) Courses (type courses)<br>" +
+		choices := "What do you want to search for?" + "\n" +
+			"1) Jobs & Internships (type jobs)" + "\n" +
+			"2) Courses (type courses)" + "\n" +
 			"3) Bachelor, Masters & PHD Degrees (type degrees)"
 		return choices, resp, nil
+
 	case 1:
 		switch strings.ToLower(input) {
 		case "jobs":
@@ -404,9 +461,9 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 			scenario = 2
 			session["scenario"] = scenario
 		case "restart":
-			choices := "What do you want to search for?<br>" +
-				"1) Jobs & Internships (type jobs)<br>" +
-				"2) Courses (type courses)<br>" +
+			choices := "What do you want to search for?" + "\n" +
+				"1) Jobs & Internships (type jobs)" + "\n" +
+				"2) Courses (type courses)" + "\n" +
 				"3) Bachelor, Masters & PHD Degrees (type degrees)"
 			var array []string
 			session["preferences"] = array
@@ -417,8 +474,8 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 			session["degreesCounter"] = 0
 
 			return choices, resp, nil
-		}
 
+		}
 		switch scenario {
 		case 0:
 			message, resp, err = HandleJobs(session, input)
@@ -427,7 +484,6 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 		case 2:
 			message, resp, err = HandleDegrees(session, input)
 		}
-
 	}
 	return message, resp, err
 }
