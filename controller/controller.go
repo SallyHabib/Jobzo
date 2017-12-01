@@ -427,6 +427,12 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 		}
 	}
 
+	_, validateFound := session["validate"]
+	if !validateFound {
+		session["validate"] = 0
+	}
+	validate, _ := session["validate"].(int)
+
 	_, Found := session["initialize"]
 	if !Found {
 		session["initialize"] = 0
@@ -452,15 +458,23 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 	case 1:
 		switch strings.ToLower(input) {
 		case "jobs":
+			validate++
+			session["validate"] = validate
 			scenario = 0
 			session["scenario"] = scenario
 		case "courses":
+			validate++
+			session["validate"] = validate
 			scenario = 1
 			session["scenario"] = scenario
 		case "degrees":
+			validate++
+			session["validate"] = validate
 			scenario = 2
 			session["scenario"] = scenario
 		case "restart":
+			validate = 0
+			session["validate"] = validate
 			choices := "What do you want to search for?" + "\n" +
 				"1) Jobs & Internships (type jobs)" + "\n" +
 				"2) Courses (type courses)" + "\n" +
@@ -474,8 +488,9 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 			session["degreesCounter"] = 0
 
 			return choices, resp, nil
-
 		}
+	}
+	if validate == 1 {
 		switch scenario {
 		case 0:
 			message, resp, err = HandleJobs(session, input)
@@ -484,6 +499,12 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 		case 2:
 			message, resp, err = HandleDegrees(session, input)
 		}
+	} else {
+		if validate == 0 {
+			return "Please Choose Jobs,degrees, courses OR choose from the Buttons", resp, nil
+		}
+
 	}
+
 	return message, resp, err
 }
