@@ -162,20 +162,14 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		return "Are you looking for a job or an internship?", resp, nil
 	case 2:
 		switch strings.ToLower(input) {
-		case "job":
-			userInputs = append(userInputs, input)
-			session["preferences"] = userInputs
-			counter++
-			session["counter"] = counter
-			return "which country?", resp, nil
-		case "internship":
+		case "job", "internship":
 			userInputs = append(userInputs, input)
 			session["preferences"] = userInputs
 			counter++
 			session["counter"] = counter
 			return "which country?", resp, nil
 		default:
-			return "Please choose Job OR Internship", resp, nil
+			return "Please choose Job or Internship", resp, nil
 		}
 
 	case 3:
@@ -271,27 +265,7 @@ func HandleCourses(session models.Session, input string) (string, models.Respons
 		return "Are you searching for beginner, intermediate or advanced course?", resp, nil
 	case 2:
 		switch strings.ToLower(input) {
-		case "beginner":
-			newInput := strings.Replace(input, " ", "%20", -1)
-			userInputs = append(userInputs, newInput)
-			fmt.Println(userInputs[0], userInputs[1])
-			messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
-			userInputs = userInputs[:0]
-			session["courses"] = userInputs
-			counter = 0
-			session["coursesCounter"] = counter
-			return "", messageResp, err
-		case "intermediate":
-			newInput := strings.Replace(input, " ", "%20", -1)
-			userInputs = append(userInputs, newInput)
-			fmt.Println(userInputs[0], userInputs[1])
-			messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
-			userInputs = userInputs[:0]
-			session["courses"] = userInputs
-			counter = 0
-			session["coursesCounter"] = counter
-			return "", messageResp, err
-		case "advanced":
+		case "beginner", "intermediate", "advanced":
 			newInput := strings.Replace(input, " ", "%20", -1)
 			userInputs = append(userInputs, newInput)
 			fmt.Println(userInputs[0], userInputs[1])
@@ -302,9 +276,8 @@ func HandleCourses(session models.Session, input string) (string, models.Respons
 			session["coursesCounter"] = counter
 			return "", messageResp, err
 		default:
-			return "Please choose one of the following beginner , intermediate, advanced", resp, nil
+			return "Please choose one of the following beginner, intermediate or advanced", resp, nil
 		}
-
 	}
 	return "", resp, nil
 }
@@ -358,29 +331,15 @@ func HandleDegrees(session models.Session, input string) (string, models.Respons
 		return "Are you looking for a Bachelor , Masters or PHD?", resp, nil
 	case 2:
 		switch strings.ToLower(input) {
-		case "bachelor":
+		case "bachelor", "masters", "phd":
 			userInputs = append(userInputs, input)
 			session["degrees"] = userInputs
 			counter++
 			session["degreesCounter"] = counter
 			return "which country?", resp, nil
-		case "masters":
-			userInputs = append(userInputs, input)
-			session["degrees"] = userInputs
-			counter++
-			session["degreesCounter"] = counter
-			return "which country?", resp, nil
-		case "phd":
-			userInputs = append(userInputs, input)
-			session["degrees"] = userInputs
-			counter++
-			session["degreesCounter"] = counter
-			return "which country?", resp, nil
-
 		default:
-			return "Please enter one of the 3 Choices PHD,Masters OR Bachelor", resp, nil
+			return "Please enter one of the 3 Choices PHD, Masters or Bachelor", resp, nil
 		}
-
 	case 3:
 		countries := getCountries()
 		found := false
@@ -490,7 +449,11 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 			return choices, resp, nil
 		}
 	}
-	if validate == 1 {
+
+	switch session["validate"] {
+	case 0:
+		return "Please Choose jobs, degrees, courses OR choose from the Buttons", resp, nil
+	case 1:
 		switch scenario {
 		case 0:
 			message, resp, err = HandleJobs(session, input)
@@ -499,11 +462,8 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 		case 2:
 			message, resp, err = HandleDegrees(session, input)
 		}
-	} else {
-		if validate == 0 {
-			return "Please Choose Jobs,degrees, courses OR choose from the Buttons", resp, nil
-		}
-
+	default:
+		return "Please Choose jobs, degrees, courses OR choose from the Buttons", resp, nil
 	}
 
 	return message, resp, err
