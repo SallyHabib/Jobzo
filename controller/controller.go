@@ -144,6 +144,7 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 	if !counterFound {
 		session["counter"] = 0
 	}
+
 	counter, _ := session["counter"].(int)
 	userInputs, _ := session["preferences"].([]string)
 	resp := models.Response{}
@@ -453,7 +454,7 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 	switch session["validate"] {
 	case 0:
 		return "Please Choose jobs, degrees, courses OR choose from the Buttons", resp, nil
-	case 1:
+	default:
 		switch scenario {
 		case 0:
 			message, resp, err = HandleJobs(session, input)
@@ -462,8 +463,6 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 		case 2:
 			message, resp, err = HandleDegrees(session, input)
 		}
-	default:
-		return "Please Choose jobs, degrees, courses OR choose from the Buttons", resp, nil
 	}
 
 	return message, resp, err
