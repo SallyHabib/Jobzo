@@ -14,7 +14,10 @@ import (
 )
 
 // Thanking ... array
-var Thanking = [...]string{"Thank u", "Thanks", "Thank you", "Merci"}
+var Thanking = [...]string{"thanks", "shokran", "thnx", "sanko", "zanko", "sankyo", "zankyo", "merci", "rbna y5lek", "thank you", "thank u"}
+
+// Emojis ... array
+var Emojis = [...]string{":D", "😜", ":)", ";P", ":O", "(y)", ":P", "B)", "B-)", "8)", "8-)", "^_^", ":*", "O:)", "😂", ";)", "3:)", "<3"}
 
 // Goodbyes ... array
 var Goodbyes = [...]string{"bye", "au revoir", "salam"}
@@ -367,7 +370,13 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 
 	for _, c := range Thanking {
 		if strings.ToLower(input) == strings.ToLower(c) {
-			return "7byby teslam", resp, nil
+			return "Urw ^_^", resp, nil
+		}
+	}
+
+	for _, c := range Emojis {
+		if strings.ToLower(input) == strings.ToLower(c) {
+			return input, resp, nil
 		}
 	}
 
