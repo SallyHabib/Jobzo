@@ -140,10 +140,6 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		var array []string
 		session["preferences"] = array
 	}
-	_, counterFound := session["counter"]
-	if !counterFound {
-		session["counter"] = 0
-	}
 
 	counter, _ := session["counter"].(int)
 	userInputs, _ := session["preferences"].([]string)
@@ -245,10 +241,7 @@ func HandleCourses(session models.Session, input string) (string, models.Respons
 		var array []string
 		session["courses"] = array
 	}
-	_, counterFound := session["coursesCounter"]
-	if !counterFound {
-		session["coursesCounter"] = 0
-	}
+
 	counter, _ := session["coursesCounter"].(int)
 	userInputs, _ := session["courses"].([]string)
 	resp := models.Response{}
@@ -310,10 +303,7 @@ func HandleDegrees(session models.Session, input string) (string, models.Respons
 		var array []string
 		session["degrees"] = array
 	}
-	_, counterFound := session["degreesCounter"]
-	if !counterFound {
-		session["degreesCounter"] = 0
-	}
+
 	counter, _ := session["degreesCounter"].(int)
 	userInputs, _ := session["degrees"].([]string)
 	resp := models.Response{}
@@ -418,16 +408,19 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 	case 1:
 		switch strings.ToLower(input) {
 		case "jobs":
+			session["counter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 0
 			session["scenario"] = scenario
 		case "courses":
+			session["coursesCounter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 1
 			session["scenario"] = scenario
 		case "degrees":
+			session["degreesCounter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 2
@@ -441,10 +434,10 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 				"3) Bachelor, Masters & PHD Degrees (type degrees)"
 			var array []string
 			session["preferences"] = array
-			session["counter"] = 0
-			session["coursesCounter"] = 0
 			session["courses"] = array
 			session["degrees"] = array
+			session["counter"] = 0
+			session["coursesCounter"] = 0
 			session["degreesCounter"] = 0
 
 			return choices, resp, nil
