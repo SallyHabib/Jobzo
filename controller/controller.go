@@ -22,6 +22,8 @@ var Emojis = [...]string{":D", "😜", ":)", ";P", ":O", "(y)", ":P", "B)", "B-)
 // Goodbyes ... array
 var Goodbyes = [...]string{"bye", "au revoir", "salam"}
 
+var jobs = false
+
 // getCountries ... function
 func getCountries() []models.Country {
 	raw, err := ioutil.ReadFile("./countries.json")
@@ -39,7 +41,7 @@ func getCountries() []models.Country {
 func SearchForLocalJobs(searchWord string, job string, country string) (models.Response, error) {
 	var kind string
 	var link string
-	if strings.Contains(job, "job") {
+	if strings.Contains(strings.ToLower(job), "job") {
 		kind = "jobs"
 	} else {
 		kind = "internships"
@@ -65,7 +67,7 @@ func SearchForLocalJobs(searchWord string, job string, country string) (models.R
 func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (models.Response, error) {
 	var kind string
 	var link string
-	if strings.Contains(job, "job") {
+	if strings.Contains(strings.ToLower(job), "job") {
 		kind = "jobs"
 	} else {
 		kind = "internships"
@@ -90,7 +92,7 @@ func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (mo
 func SearchForGlobalJobs(searchWord string, job string, country string) (models.Response, error) {
 	var kind string
 	var link string
-	if strings.Contains(job, "job") {
+	if strings.Contains(strings.ToLower(job), "job") {
 		kind = "jobs"
 	} else {
 		kind = "internships"
@@ -115,7 +117,7 @@ func SearchForGlobalJobs(searchWord string, job string, country string) (models.
 func SearchForGlobalJobsGlassdoor(searchWord string, job string, country string) (models.Response, error) {
 	var kind string
 	var link string
-	if strings.Contains(job, "job") {
+	if strings.Contains(strings.ToLower(job), "job") {
 		kind = "jobs"
 	} else {
 		kind = "internships"
