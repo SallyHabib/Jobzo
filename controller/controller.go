@@ -54,7 +54,7 @@ func SearchForLocalJobs(searchWord string, job string, country string) (models.R
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No jobs found")
+		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
 		return result, err
 	}
 
@@ -80,7 +80,7 @@ func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (mo
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No jobs found")
+		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
 		return result, err
 	}
 	return result, err
@@ -105,7 +105,7 @@ func SearchForGlobalJobs(searchWord string, job string, country string) (models.
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No jobs found")
+		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
 		return result, err
 	}
 	return result, err
@@ -130,7 +130,7 @@ func SearchForGlobalJobsGlassdoor(searchWord string, job string, country string)
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No jobs found")
+		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
 		return result, err
 	}
 	return result, err
@@ -231,7 +231,7 @@ func SearchForCourses(searchWord string, kind string) (models.Response, error) {
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No Courses found")
+		err := errors.New("No" + kind + " " + searchWord + " courses found")
 		return result, err
 	}
 	return result, err
@@ -293,7 +293,7 @@ func SearchForDegrees(searchWord string, kind string, country string) (models.Re
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No " + kind + " found")
+		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
 		return result, err
 	}
 	return result, err
