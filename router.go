@@ -99,14 +99,14 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 
 	message, response, err := controller.HandleSequence(session, data["message"].(string))
 	if err != nil {
-		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
-		return
-	}
-
-	// Write a JSON containg the processed response
-	if message != "" {
 		WriteJSON(w, models.JSON{
-			"message": message,
+			"message":    err,
+			"statusCode": 422,
+		})
+	} else if message != "" {
+		WriteJSON(w, models.JSON{
+			"message":    message,
+			"statusCode": 200,
 		})
 	} else {
 		WriteJSON2(w, response)
