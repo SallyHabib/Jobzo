@@ -54,7 +54,7 @@ func SearchForLocalJobs(searchWord string, job string, country string) (models.R
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
+		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 
@@ -80,7 +80,7 @@ func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (mo
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
+		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, err
@@ -105,7 +105,7 @@ func SearchForGlobalJobs(searchWord string, job string, country string) (models.
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
+		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, err
@@ -130,7 +130,7 @@ func SearchForGlobalJobsGlassdoor(searchWord string, job string, country string)
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
+		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, err
@@ -138,12 +138,6 @@ func SearchForGlobalJobsGlassdoor(searchWord string, job string, country string)
 
 // HandleJobs ... function
 func HandleJobs(session models.Session, input string) (string, models.Response, error) {
-	_, arrayFound := session["preferences"]
-	if !arrayFound {
-		var array []string
-		session["preferences"] = array
-	}
-
 	counter, _ := session["counter"].(int)
 	userInputs, _ := session["preferences"].([]string)
 	resp := models.Response{}
@@ -194,24 +188,37 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		messageResp2 := models.Response{}
 
 		var err error
+		var err2 error
 		if strings.ToLower(userInputs[2]) == "egypt" {
 			messageResp, err = SearchForLocalJobs(userInputs[0], userInputs[1], userInputs[2])
-			messageResp2, err = SearchForLocalJobsWuzzuf(userInputs[0], userInputs[1], userInputs[2])
+			messageResp2, err2 = SearchForLocalJobsWuzzuf(userInputs[0], userInputs[1], userInputs[2])
 		} else {
 			messageResp, err = SearchForGlobalJobs(userInputs[0], userInputs[1], userInputs[2])
-			messageResp2, err = SearchForGlobalJobsGlassdoor(userInputs[0], userInputs[1], userInputs[2])
+			messageResp2, err2 = SearchForGlobalJobsGlassdoor(userInputs[0], userInputs[1], userInputs[2])
 		}
 
-		// concatenating 2 results
-		i := 0
-		for i < len(messageResp2.Items) {
-			messageResp.Items = append(messageResp.Items, messageResp2.Items[i])
-			i = i + 1
-		}
 		userInputs = userInputs[:0]
 		session["preferences"] = userInputs
 		counter = 0
 		session["counter"] = counter
+
+		if err != nil {
+			if err2 != nil {
+				// concatenating 2 results
+				i := 0
+				for i < len(messageResp2.Items) {
+					messageResp.Items = append(messageResp.Items, messageResp2.Items[i])
+					i = i + 1
+				}
+			} else {
+				return "", messageResp, err
+			}
+		} else {
+			if err2 != nil {
+				return "", messageResp2, err2
+			}
+			return "", messageResp, err
+		}
 
 		return "", messageResp, err
 	}
@@ -231,7 +238,7 @@ func SearchForCourses(searchWord string, kind string) (models.Response, error) {
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No" + kind + " " + searchWord + " courses found")
+		err := errors.New("No " + kind + " " + searchWord + " courses found")
 		return result, err
 	}
 	return result, err
@@ -239,15 +246,10 @@ func SearchForCourses(searchWord string, kind string) (models.Response, error) {
 
 // HandleCourses ... function
 func HandleCourses(session models.Session, input string) (string, models.Response, error) {
-	_, arrayFound := session["courses"]
-	if !arrayFound {
-		var array []string
-		session["courses"] = array
-	}
-
 	counter, _ := session["coursesCounter"].(int)
 	userInputs, _ := session["courses"].([]string)
 	resp := models.Response{}
+
 	switch counter {
 	case 0:
 		counter++
@@ -293,7 +295,7 @@ func SearchForDegrees(searchWord string, kind string, country string) (models.Re
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No" + searchWord + " " + kind + " found in" + country)
+		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, err
@@ -301,12 +303,6 @@ func SearchForDegrees(searchWord string, kind string, country string) (models.Re
 
 // HandleDegrees ... function
 func HandleDegrees(session models.Session, input string) (string, models.Response, error) {
-	_, arrayFound := session["degrees"]
-	if !arrayFound {
-		var array []string
-		session["degrees"] = array
-	}
-
 	counter, _ := session["degreesCounter"].(int)
 	userInputs, _ := session["degrees"].([]string)
 	resp := models.Response{}
@@ -417,18 +413,24 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 	case 1:
 		switch strings.ToLower(input) {
 		case "jobs":
+			var array []string
+			session["preferences"] = array
 			session["counter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 0
 			session["scenario"] = scenario
 		case "courses":
+			var array []string
+			session["courses"] = array
 			session["coursesCounter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 1
 			session["scenario"] = scenario
 		case "degrees":
+			var array []string
+			session["degrees"] = array
 			session["degreesCounter"] = 0
 			validate++
 			session["validate"] = validate
