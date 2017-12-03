@@ -100,13 +100,11 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 	message, response, err := controller.HandleSequence(session, data["message"].(string))
 	if err != nil {
 		WriteJSON(w, models.JSON{
-			"message":    err,
-			"statusCode": 422,
+			"message": err.Error(),
 		})
 	} else if message != "" {
 		WriteJSON(w, models.JSON{
-			"message":    message,
-			"statusCode": 200,
+			"message": message,
 		})
 	} else {
 		WriteJSON2(w, response)
