@@ -56,7 +56,8 @@ func SearchForLocalJobs(searchWord string, job string, country string) (models.R
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 || i == 1 {
-		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
+		newSearchWord := strings.Replace(searchWord, "%20", " ", -1)
+		err := errors.New("No " + newSearchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 
@@ -82,7 +83,8 @@ func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (mo
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 || i == 1 {
-		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
+		newSearchWord := strings.Replace(searchWord, "%20", " ", -1)
+		err := errors.New("No " + newSearchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, nil
@@ -107,7 +109,8 @@ func SearchForGlobalJobs(searchWord string, job string, country string) (models.
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 || i == 1 {
-		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
+		newSearchWord := strings.Replace(searchWord, "%20", " ", -1)
+		err := errors.New("No " + newSearchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, nil
@@ -132,7 +135,8 @@ func SearchForGlobalJobsGlassdoor(searchWord string, job string, country string)
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 || i == 1 {
-		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
+		newSearchWord := strings.Replace(searchWord, "%20", " ", -1)
+		err := errors.New("No " + newSearchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, nil
@@ -234,7 +238,8 @@ func SearchForCourses(searchWord string, kind string) (models.Response, error) {
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No " + kind + " " + searchWord + " courses found")
+		newSearchWord := strings.Replace(searchWord, "%20", " ", -1)
+		err := errors.New("No " + kind + " " + newSearchWord + " courses found")
 		return result, err
 	}
 	return result, err
@@ -291,7 +296,8 @@ func SearchForDegrees(searchWord string, kind string, country string) (models.Re
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
 	if i == 0 {
-		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
+		newSearchWord := strings.Replace(searchWord, "%20", " ", -1)
+		err := errors.New("No " + newSearchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 	return result, err
