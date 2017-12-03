@@ -53,12 +53,12 @@ func SearchForLocalJobs(searchWord string, job string, country string) (models.R
 	defer response.Body.Close()
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
-	if i == 0 {
+	if i == 0 || i == 1 {
 		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
 
-	return result, err
+	return result, nil
 }
 
 //SearchForLocalJobsWuzzuf ... function
@@ -79,11 +79,11 @@ func SearchForLocalJobsWuzzuf(searchWord string, job string, country string) (mo
 	defer response.Body.Close()
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
-	if i == 0 {
+	if i == 0 || i == 1 {
 		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
-	return result, err
+	return result, nil
 }
 
 // SearchForGlobalJobs ... function
@@ -104,11 +104,11 @@ func SearchForGlobalJobs(searchWord string, job string, country string) (models.
 	defer response.Body.Close()
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
-	if i == 0 {
+	if i == 0 || i == 1 {
 		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
-	return result, err
+	return result, nil
 }
 
 // SearchForGlobalJobsGlassdoor ... function
@@ -129,11 +129,11 @@ func SearchForGlobalJobsGlassdoor(searchWord string, job string, country string)
 	defer response.Body.Close()
 	json.NewDecoder(response.Body).Decode(&result)
 	i, err := strconv.Atoi(result.Info.Num)
-	if i == 0 {
+	if i == 0 || i == 1 {
 		err := errors.New("No " + searchWord + " " + kind + " found in " + country)
 		return result, err
 	}
-	return result, err
+	return result, nil
 }
 
 // HandleJobs ... function
@@ -202,24 +202,18 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		counter = 0
 		session["counter"] = counter
 
-		if err != nil {
-			if err2 != nil {
-				// concatenating 2 results
-				i := 0
-				for i < len(messageResp2.Items) {
-					messageResp.Items = append(messageResp.Items, messageResp2.Items[i])
-					i = i + 1
-				}
-			} else {
-				return "", messageResp, err
-			}
-		} else {
-			if err2 != nil {
-				return "", messageResp2, err2
+		if err == nil && err2 == nil {
+			i := 0
+			for i < len(messageResp2.Items) {
+				messageResp.Items = append(messageResp.Items, messageResp2.Items[i])
+				i = i + 1
 			}
 			return "", messageResp, err
+		} else if err == nil && err2 != nil {
+			return "", messageResp, err
+		} else if err != nil && err2 == nil {
+			return "", messageResp2, err2
 		}
-
 		return "", messageResp, err
 	}
 	return "", resp, nil
