@@ -14,10 +14,13 @@ import (
 )
 
 // Thanking ... array
-var Thanking = [...]string{"thanks", "shokran", "thnx", "sanko", "zanko", "sankyo", "zankyo", "merci", "rbna y5lek", "thank you", "thank u"}
+var Thanking = [...]string{"thanks", "shokran", "thnx", "sanko", "zanko", "sankyo", "zankyo", "merci", "rbna y5lek", "thank you", "thank u", "shokr"}
 
 // Emojis ... array
 var Emojis = [...]string{":D", "😜", ":)", ";P", ":O", "(y)", ":P", "B)", "B-)", "8)", "8-)", "^_^", ":*", "O:)", "😂", ";)", "3:)", "<3"}
+
+// Complements ... array
+var Complements = [...]string{"nice", "7byby", "zy el fol", "7abebe", "7bb", "zalfol", "cool", "awesome", "great", "ur good", "danta dma8", "danta dma9", "danta dema8", "danta dma3'", "danta dema3'", "cute", "awsome", "lol", "it is good", "u r good"}
 
 // Goodbyes ... array
 var Goodbyes = [...]string{"bye", "au revoir", "salam"}
@@ -388,6 +391,12 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 	for _, c := range Emojis {
 		if strings.Contains(strings.ToLower(newInput), strings.ToLower(c)) {
 			return input, resp, nil
+		}
+	}
+
+	for _, c := range Complements {
+		if strings.Contains(strings.ToLower(newInput), strings.ToLower(c)) {
+			return "7byby teslam >_<", resp, nil
 		}
 	}
 
