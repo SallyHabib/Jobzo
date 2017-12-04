@@ -161,15 +161,20 @@ func HandleJobs(session models.Session, input string) (string, models.Response, 
 		session["counter"] = counter
 		return "Are you looking for a job or an internship?", resp, nil
 	case 2:
-		switch strings.ToLower(input) {
-		case "job", "internship":
-			userInputs = append(userInputs, input)
+		if strings.Contains(strings.ToLower(input), "job") {
+			userInputs = append(userInputs, "job")
 			session["preferences"] = userInputs
 			counter++
 			session["counter"] = counter
 			return "which country?", resp, nil
-		default:
-			return "Please choose Job or Internship", resp, nil
+		} else if strings.Contains(strings.ToLower(input), "internship") {
+			userInputs = append(userInputs, "internship")
+			session["preferences"] = userInputs
+			counter++
+			session["counter"] = counter
+			return "which country?", resp, nil
+		} else {
+			return "Please choose either a Job or an Internship", resp, nil
 		}
 
 	case 3:
@@ -264,20 +269,22 @@ func HandleCourses(session models.Session, input string) (string, models.Respons
 		session["coursesCounter"] = counter
 		return "Are you searching for beginner, intermediate or advanced course?", resp, nil
 	case 2:
-		switch strings.ToLower(input) {
-		case "beginner", "intermediate", "advanced":
-			newInput := strings.Replace(input, " ", "%20", -1)
-			userInputs = append(userInputs, newInput)
-			fmt.Println(userInputs[0], userInputs[1])
-			messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
-			userInputs = userInputs[:0]
-			session["courses"] = userInputs
-			counter = 0
-			session["coursesCounter"] = counter
-			return "", messageResp, err
-		default:
-			return "Please choose one of the following beginner, intermediate or advanced", resp, nil
+		if !strings.Contains(strings.ToLower(input), "beginner") && !strings.Contains(strings.ToLower(input), "intermediate") && !strings.Contains(strings.ToLower(input), "advanced") {
+			return "Please specify which type of course you want", resp, nil
 		}
+		if strings.Contains(strings.ToLower(input), "beginner") {
+			userInputs = append(userInputs, "beginner")
+		} else if strings.Contains(strings.ToLower(input), "intermediate") {
+			userInputs = append(userInputs, "intermediate")
+		} else if strings.Contains(strings.ToLower(input), "advanced") {
+			userInputs = append(userInputs, "advanced")
+		}
+		messageResp, err := SearchForCourses(userInputs[0], userInputs[1])
+		userInputs = userInputs[:0]
+		session["courses"] = userInputs
+		counter = 0
+		session["coursesCounter"] = counter
+		return "", messageResp, err
 	}
 	return "", resp, nil
 }
@@ -322,16 +329,20 @@ func HandleDegrees(session models.Session, input string) (string, models.Respons
 		session["degreesCounter"] = counter
 		return "Are you looking for a Bachelor , Masters or PHD?", resp, nil
 	case 2:
-		switch strings.ToLower(input) {
-		case "bachelor", "masters", "phd":
-			userInputs = append(userInputs, input)
-			session["degrees"] = userInputs
-			counter++
-			session["degreesCounter"] = counter
-			return "which country?", resp, nil
-		default:
-			return "Please enter one of the 3 Choices PHD, Masters or Bachelor", resp, nil
+		if !strings.Contains(strings.ToLower(input), "bachelor") && !strings.Contains(strings.ToLower(input), "masters") && !strings.Contains(strings.ToLower(input), "phd") {
+			return "Please specify which type of degree you want to achieve", resp, nil
 		}
+		if strings.Contains(strings.ToLower(input), "bachelor") {
+			userInputs = append(userInputs, "bachelor")
+		} else if strings.Contains(strings.ToLower(input), "masters") {
+			userInputs = append(userInputs, "masters")
+		} else if strings.Contains(strings.ToLower(input), "phd") {
+			userInputs = append(userInputs, "phd")
+		}
+		session["degrees"] = userInputs
+		counter++
+		session["degreesCounter"] = counter
+		return "which country?", resp, nil
 	case 3:
 		countries := getCountries()
 		found := false
@@ -365,22 +376,24 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 	var message string
 	var err error
 	resp := models.Response{}
+	newInput := strings.TrimSpace(input)
+	fmt.Println(newInput)
 
 	for _, c := range Thanking {
-		if strings.ToLower(input) == strings.ToLower(c) {
+		if strings.Contains(strings.ToLower(newInput), strings.ToLower(c)) {
 			return "Urw ^_^", resp, nil
 		}
 	}
 
 	for _, c := range Emojis {
-		if strings.ToLower(input) == strings.ToLower(c) {
+		if strings.Contains(strings.ToLower(newInput), strings.ToLower(c)) {
 			return input, resp, nil
 		}
 	}
 
 	for _, c := range Goodbyes {
-		if strings.ToLower(input) == strings.ToLower(c) {
-			return "Bye", resp, nil
+		if strings.Contains(strings.ToLower(newInput), strings.ToLower(c)) {
+			return "Bye :D", resp, nil
 		}
 	}
 
@@ -413,32 +426,29 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 		return choices, resp, nil
 
 	case 1:
-		switch strings.ToLower(input) {
-		case "jobs":
-			var array []string
+		var array []string
+		if strings.Contains(strings.ToLower(newInput), "jobs") {
 			session["preferences"] = array
 			session["counter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 0
 			session["scenario"] = scenario
-		case "courses":
-			var array []string
+		} else if strings.Contains(strings.ToLower(newInput), "courses") {
 			session["courses"] = array
 			session["coursesCounter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 1
 			session["scenario"] = scenario
-		case "degrees":
-			var array []string
+		} else if strings.Contains(strings.ToLower(newInput), "degrees") {
 			session["degrees"] = array
 			session["degreesCounter"] = 0
 			validate++
 			session["validate"] = validate
 			scenario = 2
 			session["scenario"] = scenario
-		case "restart":
+		} else if strings.Contains(strings.ToLower(newInput), "restart") {
 			validate = 0
 			session["validate"] = validate
 			choices := "What do you want to search for?" + "\n" +
@@ -459,15 +469,15 @@ func HandleSequence(session models.Session, input string) (string, models.Respon
 
 	switch session["validate"] {
 	case 0:
-		return "Please Choose jobs, degrees, courses OR choose from the Buttons", resp, nil
+		return "Please Choose jobs, degrees, courses Or choose from the buttons", resp, nil
 	default:
 		switch scenario {
 		case 0:
-			message, resp, err = HandleJobs(session, input)
+			message, resp, err = HandleJobs(session, newInput)
 		case 1:
-			message, resp, err = HandleCourses(session, input)
+			message, resp, err = HandleCourses(session, newInput)
 		case 2:
-			message, resp, err = HandleDegrees(session, input)
+			message, resp, err = HandleDegrees(session, newInput)
 		}
 	}
 
